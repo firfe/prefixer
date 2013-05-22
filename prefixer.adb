@@ -128,6 +128,7 @@ Function Check_Paranthesis (Expression_String : String) return boolean is -- Che
 Function Construct_ExpressionTree (Expression_String : String; First, Last : Natural) return Node_Ptr is -- Constructs the Tree
 	count1 : integer := 0;
 	count2 : integer := 0;
+	count3 : integer := First;
 	Position_Root : integer;
 	temp:node_ptr:=null;
 	Begin
@@ -192,7 +193,7 @@ Function Construct_ExpressionTree (Expression_String : String; First, Last : Nat
 		end loop;
 
 		For a in First..Last loop
-			if Check_Integer_Variable(a) = True then
+			if Check_Integer_Variable(a) = True then			
 				Return Create_Node(character'pos(Expression_String(a)), null, null);
 			end if;
 		end loop;
@@ -245,21 +246,22 @@ end Find_Root;
  Procedure Prefix_Root_Notation (Node : Node_Ptr) is -- This starts off reading the expression tree from the root node
 	Begin
 		if Node.Left_Child /= null AND Node.Right_Child /= null then
-			Put('(');
+			Put("(");
 		end if;
 		Put(character'val(Node.Data));
+		Put(' ');
 		if Node.Left_Child /= null then
 			Prefix_Left_Notation(Node.Left_Child);
 		end if;
 		for i in 1..count0-1 loop
-			put(')');
+			put(")");
 		end loop;
 		count0 := 0;
 		if Node.Right_Child /= null then
 			Prefix_Right_Notation(Node.Right_Child);
 		end if;	
 		for i in 1..count0-1 loop
-			put(')');
+			put(")");
 		end loop;
 	end Prefix_Root_Notation;
 --=========================================================================================================
@@ -267,9 +269,10 @@ end Find_Root;
 	Begin
 
 		if Node.Left_Child /= null AND Node.Right_Child /= null then
-			Put('(');
+			Put("(");
 		end if;
 		Put(character'val(Node.Data));
+		Put(' ');
 		if Node.Left_Child /= null then
 			Prefix_Left_Notation(Node.Left_Child);
 		end if;
@@ -280,13 +283,13 @@ end Find_Root;
 --=========================================================================================================
    Procedure Prefix_Right_Notation (Node : Node_Ptr) is -- this is used when traversing down the right child
 	Begin
-		count0 := count0 +1;
 		if Node.Left_Child /= null AND Node.Right_Child /= null then
-		Put('(');
+		Put("(");
 		end if;
 		Put(character'val(Node.Data));
+		Put(' ');
 		if Node.Right_Child = null AND Node.Left_Child = null then
-		Put(')');
+		Put(")");
 		end if;
 		if Node.Left_Child /= null then
 			Prefix_Left_Notation(Node.Left_Child);
