@@ -1,9 +1,3 @@
---This program works by first retrieving the information from an expression from a text file, for example " 3 * x + 4 - (9 + y) / 4 "
--- After it retrieves this information the expression as a string to Expression_String, then this string is read and put into a tree based on the rules of Order of Operations
--- Then the information is retrieved from the tree in the order of prefix notation . If there are no characters in the expression it will also display the value of the expression.
--- Limitations of this program is that the information given to the program have to be single digit integers or single characters, also every single integer/character must have a empty space in front of or behind it.
-
--- Ronald Choi
 --======================================================================================================
 with Ada.Text_IO, Ada.Integer_Text_IO, ada.float_text_io, Ada.Command_Line;
 use  Ada.Text_IO, Ada.Integer_Text_IO, ada.float_text_io, Ada.Command_Line;
@@ -145,7 +139,22 @@ Function Construct_ExpressionTree (Expression_String : String; First, Last : Nat
 			end if; 
 
 			if Count1-Count2 = 0 then
-				if Expression_String(i) = '+' OR Expression_String(i) = '-' OR Expression_String(i) = '*' OR Expression_String(i) = '/' OR Expression_String(i) = '^' then
+				if Expression_String(i) = '+' OR Expression_String(i) = '-' then
+					Position_Root := i;
+					Return Create_Node(character'pos(Expression_String(Position_Root)), Construct_ExpressionTree(Expression_String,First,Position_Root-2), Construct_ExpressionTree(Expression_String,Position_Root+2,Last));
+				end if;
+			end if;
+		end loop;
+
+		For i in First..Last loop -- First loop used to create a node for a operation without paranthesis
+			if expression_string(i) = '(' then
+				count1 := count1+1;
+			elsif expression_string(i) = ')' then
+				count2 := count2+1;
+			end if; 
+
+			if Count1-Count2 = 0 then
+				if Expression_String(i) = '*' OR Expression_String(i) = '/' OR Expression_String(i) = '^' then
 					Position_Root := i;
 					Return Create_Node(character'pos(Expression_String(Position_Root)), Construct_ExpressionTree(Expression_String,First,Position_Root-2), Construct_ExpressionTree(Expression_String,Position_Root+2,Last));
 				end if;
@@ -160,7 +169,22 @@ Function Construct_ExpressionTree (Expression_String : String; First, Last : Nat
 			end if; 
 
 			if Count1-Count2 /= 0 then
-				if Expression_String(i) = '+' OR Expression_String(i) = '-' OR Expression_String(i) = '*' OR Expression_String(i) = '/' OR Expression_String(i) = '^' then
+				if Expression_String(i) = '+' OR Expression_String(i) = '-' then
+					Position_Root := i;
+					Return Create_Node(character'pos(Expression_String(Position_Root)), Construct_ExpressionTree(Expression_String,First,Position_Root-2), Construct_ExpressionTree(Expression_String,Position_Root+2,Last));
+				end if;
+			end if;
+		end loop;
+
+		For i in First..Last loop -- Second loop used to create a node for a operation with paranthesis (only used if there are no operations not surronded by paranthesis)
+			if expression_string(i) = '(' then
+				count1 := count1+1;
+			elsif expression_string(i) = ')' then
+				count2 := count2+1;
+			end if; 
+
+			if Count1-Count2 /= 0 then
+				if Expression_String(i) = '*' OR Expression_String(i) = '/' OR Expression_String(i) = '^' then
 					Position_Root := i;
 					Return Create_Node(character'pos(Expression_String(Position_Root)), Construct_ExpressionTree(Expression_String,First,Position_Root-2), Construct_ExpressionTree(Expression_String,Position_Root+2,Last));
 				end if;
@@ -193,7 +217,7 @@ Procedure Find_Root (Expression_String : String; First, Last : Natural) is -- Fi
 				if Expression_String(i) = '+' OR Expression_String(i) = '-' then
 					Position_Root := i;
 					done := true;
-					Root := Create_Node(character'pos(Expression_String(Position_Root)), Construct_ExpressionTree(Expression_String,First+1,Position_Root-1), Construct_ExpressionTree(Expression_String,Position_Root+1,Last-1));
+					Root := Create_Node(character'pos(Expression_String(Position_Root)), Construct_ExpressionTree(Expression_String,First,Position_Root-2), Construct_ExpressionTree(Expression_String,Position_Root+2,Last));
 				end if;
 			end if;
 		end loop;
@@ -208,7 +232,7 @@ Procedure Find_Root (Expression_String : String; First, Last : Natural) is -- Fi
 				if Count1-Count2 = 0 then
 					if Expression_String(i) = '*' OR Expression_String(i) = '/' OR Expression_string(i) = '^' then
 						Position_Root := i;
-						Root := Create_Node(character'pos(Expression_String(Position_Root)), Construct_ExpressionTree(Expression_String,First+1,Position_Root-1), Construct_ExpressionTree(Expression_String,Position_Root+1,Last-1));
+						Root := Create_Node(character'pos(Expression_String(Position_Root)), Construct_ExpressionTree(Expression_String,First,Position_Root-2), Construct_ExpressionTree(Expression_String,Position_Root+2,Last));
 					end if;
 				end if;
 			end loop;
