@@ -193,11 +193,18 @@ Function Construct_ExpressionTree (Expression_String : String; First, Last : Nat
 		end loop;
 
 		For a in First..Last loop
-			if Check_Integer_Variable(a) = True then			
-				Return Create_Node(character'pos(Expression_String(a)), null, null);
+			if Check_Integer_Variable(a) = True then
+				count3 := a;
+				While check_integer_variable(count3) = true loop
+					count3 := count3 +1;
+				end loop;
+				if check_Integer_variable(a+1) = True then
+				Return Create_Node(integer'value(Expression_String(a..count3)), null, null);
+				else			
+				Return Create_Node(character'pos(Expression_String(a)) -48, null, null);
+				end if;
 			end if;
 		end loop;
-
 		raise Exception_Missing_Number;
 	end Construct_ExpressionTree;
 --==========================================================================================================
@@ -271,8 +278,13 @@ end Find_Root;
 		if Node.Left_Child /= null AND Node.Right_Child /= null then
 			Put("(");
 		end if;
+		if Node.Right_Child = null AND Node.Left_Child = null then
+		Put(Node.Data,1);
+		Put(' ');
+		else
 		Put(character'val(Node.Data));
 		Put(' ');
+		end if;
 		if Node.Left_Child /= null then
 			Prefix_Left_Notation(Node.Left_Child);
 		end if;
@@ -286,10 +298,12 @@ end Find_Root;
 		if Node.Left_Child /= null AND Node.Right_Child /= null then
 		Put("(");
 		end if;
+		if Node.Right_Child = null AND Node.Left_Child = null then
+		Put(Node.Data,1);
+		Put(" )");
+		else
 		Put(character'val(Node.Data));
 		Put(' ');
-		if Node.Right_Child = null AND Node.Left_Child = null then
-		Put(")");
 		end if;
 		if Node.Left_Child /= null then
 			Prefix_Left_Notation(Node.Left_Child);
@@ -310,11 +324,11 @@ Begin
 		Put("Prefix Notation: ");
 		Prefix_Root_Notation(root);
 		New_line;
-		if Check_Character(Expression_String) = False then
-			Put("Value:");
-			Value := Evaluate(root);
-			Put(Value,1);
-		end if;
+		--if Check_Character(Expression_String) = False then
+		--	Put("Value:");
+		--	Value := Evaluate(root);
+		--	Put(Value,1);
+		--end if;
 	   else
 		for i in 1..Expression_string'length loop
 			Put(expression_string(i));
