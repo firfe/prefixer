@@ -8,6 +8,7 @@ Type Node_Ptr is access Node_Type;
 type Node_Type is 
 record
       Data        : Integer;
+      TF	  : boolean;
       Left_Child  : Node_Ptr;
       Right_Child : Node_Ptr;
 end record;
@@ -120,9 +121,9 @@ Function Check_Paranthesis (Expression_String : String) return boolean is -- Che
 		return true;
 	end Check_Paranthesis;
 --==========================================================================================================
-  function Create_Node(Data : integer; Left_Child, Right_Child : Node_Ptr) return Node_Ptr is -- Creates a node
+  function Create_Node(Data : integer; TF : boolean; Left_Child, Right_Child : Node_Ptr) return Node_Ptr is -- Creates a node
    begin
-      return new Node_Type'(Data, Left_Child, Right_Child);
+      return new Node_Type'(Data, TF, Left_Child, Right_Child);
    end Create_Node;
 --==========================================================================================================
 Function Construct_ExpressionTree (Expression_String : String; First, Last : Natural) return Node_Ptr is -- Constructs the Tree
@@ -142,7 +143,7 @@ Function Construct_ExpressionTree (Expression_String : String; First, Last : Nat
 			if Count1-Count2 = 0 then
 				if Expression_String(i) = '+' OR Expression_String(i) = '-' then
 					Position_Root := i;
-					Return Create_Node(character'pos(Expression_String(Position_Root)), Construct_ExpressionTree(Expression_String,First,Position_Root-2), Construct_ExpressionTree(Expression_String,Position_Root+2,Last));
+					Return Create_Node(character'pos(Expression_String(Position_Root)), False, Construct_ExpressionTree(Expression_String,First,Position_Root-2), Construct_ExpressionTree(Expression_String,Position_Root+2,Last));
 				end if;
 			end if;
 		end loop;
@@ -157,12 +158,12 @@ Function Construct_ExpressionTree (Expression_String : String; First, Last : Nat
 			if Count1-Count2 = 0 then
 				if Expression_String(i) = '*' OR Expression_String(i) = '/' OR Expression_String(i) = '^' then
 					Position_Root := i;
-					Return Create_Node(character'pos(Expression_String(Position_Root)), Construct_ExpressionTree(Expression_String,First,Position_Root-2), Construct_ExpressionTree(Expression_String,Position_Root+2,Last));
+					Return Create_Node(character'pos(Expression_String(Position_Root)), False, Construct_ExpressionTree(Expression_String,First,Position_Root-2), Construct_ExpressionTree(Expression_String,Position_Root+2,Last));
 				end if;
 			end if;
 		end loop;
-	
-		For i in First..Last loop -- Second loop used to create a node for a operation with paranthesis (only used if there are no operations not surronded by paranthesis)
+
+		For i in First..Last loop -- First loop used to create a node for a operatioCreate_Node without paranthesis
 			if expression_string(i) = '(' then
 				count1 := count1+1;
 			elsif expression_string(i) = ')' then
@@ -172,12 +173,12 @@ Function Construct_ExpressionTree (Expression_String : String; First, Last : Nat
 			if Count1-Count2 /= 0 then
 				if Expression_String(i) = '+' OR Expression_String(i) = '-' then
 					Position_Root := i;
-					Return Create_Node(character'pos(Expression_String(Position_Root)), Construct_ExpressionTree(Expression_String,First,Position_Root-2), Construct_ExpressionTree(Expression_String,Position_Root+2,Last));
+					Return Create_Node(character'pos(Expression_String(Position_Root)), False, Construct_ExpressionTree(Expression_String,First,Position_Root-2), Construct_ExpressionTree(Expression_String,Position_Root+2,Last));
 				end if;
 			end if;
 		end loop;
 
-		For i in First..Last loop -- Second loop used to create a node for a operation with paranthesis (only used if there are no operations not surronded by paranthesis)
+		For i in First..Last loop -- First loop used to create a node for a operation without paranthesis
 			if expression_string(i) = '(' then
 				count1 := count1+1;
 			elsif expression_string(i) = ')' then
@@ -187,7 +188,7 @@ Function Construct_ExpressionTree (Expression_String : String; First, Last : Nat
 			if Count1-Count2 /= 0 then
 				if Expression_String(i) = '*' OR Expression_String(i) = '/' OR Expression_String(i) = '^' then
 					Position_Root := i;
-					Return Create_Node(character'pos(Expression_String(Position_Root)), Construct_ExpressionTree(Expression_String,First,Position_Root-2), Construct_ExpressionTree(Expression_String,Position_Root+2,Last));
+					Return Create_Node(character'pos(Expression_String(Position_Root)), False, Construct_ExpressionTree(Expression_String,First,Position_Root-2), Construct_ExpressionTree(Expression_String,Position_Root+2,Last));
 				end if;
 			end if;
 		end loop;
@@ -198,10 +199,10 @@ Function Construct_ExpressionTree (Expression_String : String; First, Last : Nat
 				While check_integer_variable(count3) = true loop
 					count3 := count3 +1;
 				end loop;
-				if check_Integer_variable(a+1) = True then
-				Return Create_Node(integer'value(Expression_String(a..count3)), null, null);
+				if Check_Integer_variable(a+1) = True then
+				Return Create_Node(integer'value(Expression_String(a..count3)), True, null, null); --string into an integer
 				else			
-				Return Create_Node(character'pos(Expression_String(a)) -48, null, null);
+				Return Create_Node(character'pos(Expression_String(a)), False, null, null); -- character into an integer
 				end if;
 			end if;
 		end loop;
@@ -225,7 +226,7 @@ Procedure Find_Root (Expression_String : String; First, Last : Natural) is -- Fi
 				if Expression_String(i) = '+' OR Expression_String(i) = '-' then
 					Position_Root := i;
 					done := true;
-					Root := Create_Node(character'pos(Expression_String(Position_Root)), Construct_ExpressionTree(Expression_String,First,Position_Root-2), Construct_ExpressionTree(Expression_String,Position_Root+2,Last));
+					Root := Create_Node(character'pos(Expression_String(Position_Root)), False, Construct_ExpressionTree(Expression_String,First,Position_Root-2), Construct_ExpressionTree(Expression_String,Position_Root+2,Last));
 				end if;
 			end if;
 		end loop;
@@ -240,7 +241,7 @@ Procedure Find_Root (Expression_String : String; First, Last : Natural) is -- Fi
 				if Count1-Count2 = 0 then
 					if Expression_String(i) = '*' OR Expression_String(i) = '/' OR Expression_string(i) = '^' then
 						Position_Root := i;
-						Root := Create_Node(character'pos(Expression_String(Position_Root)), Construct_ExpressionTree(Expression_String,First,Position_Root-2), Construct_ExpressionTree(Expression_String,Position_Root+2,Last));
+						Root := Create_Node(character'pos(Expression_String(Position_Root)), False, Construct_ExpressionTree(Expression_String,First,Position_Root-2), Construct_ExpressionTree(Expression_String,Position_Root+2,Last));
 					end if;
 				end if;
 			end loop;
@@ -270,40 +271,44 @@ end Find_Root;
 		for i in 1..count0-1 loop
 			put(")");
 		end loop;
+		put(')');
 	end Prefix_Root_Notation;
 --=========================================================================================================
    Procedure Prefix_Left_Notation (Node : Node_Ptr) is -- this is used when traversing down the left child
 	Begin
-
+		if Node.TF = True then
+			Put(Node.Data,1);
+			Put(" )");
+		else
 		if Node.Left_Child /= null AND Node.Right_Child /= null then
 			Put("(");
 		end if;
-		if Node.Right_Child = null AND Node.Left_Child = null then
-		Put(Node.Data,1);
-		Put(' ');
-		else
-		Put(character'val(Node.Data));
-		Put(' ');
-		end if;
+			Put(character'val(Node.Data));
+			Put(' ');
 		if Node.Left_Child /= null then
 			Prefix_Left_Notation(Node.Left_Child);
 		end if;
 		if Node.Right_Child /= null then
 			Prefix_Right_Notation(Node.Right_Child);
 		end if;	
+		end if;
 	end Prefix_Left_Notation;
 --=========================================================================================================
    Procedure Prefix_Right_Notation (Node : Node_Ptr) is -- this is used when traversing down the right child
 	Begin
+		if Node.TF = True then
+			Put(Node.Data,1);
+			Put(" )");
+		else
 		if Node.Left_Child /= null AND Node.Right_Child /= null then
 		Put("(");
 		end if;
-		if Node.Right_Child = null AND Node.Left_Child = null then
-		Put(Node.Data,1);
-		Put(" )");
+		if Node.Left_child = null AND Node.Right_Child = null then
+			Put(character'val(Node.Data));
+			Put(" )");
 		else
-		Put(character'val(Node.Data));
-		Put(' ');
+			Put(character'val(Node.Data));
+			Put(' ');
 		end if;
 		if Node.Left_Child /= null then
 			Prefix_Left_Notation(Node.Left_Child);
@@ -311,6 +316,7 @@ end Find_Root;
 		if Node.Right_Child /= null then
 			Prefix_Right_Notation(Node.Right_Child);
 		end if;	
+		end if;
 	end Prefix_Right_Notation;
 --=========================================================================================================
 Begin	
